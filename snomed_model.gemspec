@@ -5,20 +5,19 @@ require_relative "lib/snomed_model/version"
 Gem::Specification.new do |spec|
   spec.name = "snomed_model"
   spec.version = SnomedModel::VERSION
-  spec.authors = ["siva-wal"]
-  spec.email = ["siva.g@westagilelabs.com"]
+  spec.authors = ["Siva Gollapalli"]
+  spec.email = ["sivagollapalli88@gmail.com"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.summary = "Provides Active Record ORM layer to query SNOMED data"
+  # spec.homepage = "TODO: Put your gem's website or public repo URL here."
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
-  spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  # spec.metadata["homepage_uri"] = spec.homepage
+  # spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
+  # spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -36,4 +35,7 @@ Gem::Specification.new do |spec|
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_dependency "activerecord", '~> 7.1', '>= 7.1.2' 
+  spec.add_dependency 'standalone_migrations', '~> 7.1', '>= 7.1.3'
+  spec.add_dependency 'pg', '~> 1.5', '>= 1.5.4'
 end

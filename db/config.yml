@@ -1,0 +1,17 @@
+default: &default
+  adapter: postgresql
+  pool: 5
+  timeout: 5000
+  host: <%= ENV['SNOMED_DB_HOST'] %>
+  username: <%= ENV['SNOMED_DB_USERNAME'] %>
+  database: 'snomedct'
+  password: <%= ENV['SNOMED_DB_PWD'] %>
+
+development:
+  <<: *default
+
+production:
+  <<: *default
+
+test: &test
+  <<: *default
