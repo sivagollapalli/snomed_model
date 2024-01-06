@@ -7,6 +7,7 @@ require "erb"
 require_relative "snomed_model/version"
 require_relative "snomed_model/concept"
 require_relative "snomed_model/description"
+require_relative "snomed_model/relationship"
 
 module SnomedModel
   class Error < StandardError; end

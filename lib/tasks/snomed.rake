@@ -50,4 +50,34 @@ namespace :snomed do
       SnomedModel::Description.insert_all(batch)
     end
   end
+
+  task :load_relationships, [:arg] do |_, args|
+    file = args[:arg]
+    records = []
+
+    File.open(file, "r") do |f|
+      f.each_line do |line|
+        row = line.split("\t")
+        
+        next if row[0] == "id"
+        
+        records << {
+          id: row[0],
+          effectivetime: row[1],
+          active: row[2],
+          moduleid: row[3],
+          sourceid: row[4],
+          destinationid: row[5],
+          relationshipgroup: row[6],
+          typeid: row[7],
+          characteristictypeid: row[8],
+          modifierid: row[9].to_i,
+        }
+      end
+    end
+    records.each_slice(10000) do |batch|
+      p "Inserting batch....."
+      SnomedModel::Relationship.insert_all(batch)
+    end
+  end
 end

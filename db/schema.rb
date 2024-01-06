@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_06_153438) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_06_161110) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -33,4 +33,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_06_153438) do
     t.string "casesignificanceid", null: false
     t.index ["id", "effectivetime"], name: "index_descriptions_on_id_and_effectivetime", unique: true
   end
+
+  create_table "relationships", force: :cascade do |t|
+    t.string "effectivetime", null: false
+    t.string "active", null: false
+    t.string "moduleid", null: false
+    t.string "sourceid", null: false
+    t.string "destinationid", null: false
+    t.string "relationshipgroup", null: false
+    t.string "typeid", null: false
+    t.text "characteristictypeid", null: false
+    t.string "modifierid", null: false
+    t.index ["id", "effectivetime"], name: "index_relationships_on_id_and_effectivetime", unique: true
+  end
+
 end
