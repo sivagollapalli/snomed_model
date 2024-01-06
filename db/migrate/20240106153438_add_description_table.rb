@@ -9,7 +9,6 @@ class AddDescriptionTable < ActiveRecord::Migration[7.1]
       t.string :typeid, null: false
       t.text :term, null: false
       t.string :casesignificanceid, null: false
-      t.string :definitionstatusid, null: false
     end
 
     add_index :descriptions, [:id, :effectivetime], unique: true

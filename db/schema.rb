@@ -31,8 +31,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_06_153438) do
     t.string "typeid", null: false
     t.text "term", null: false
     t.string "casesignificanceid", null: false
-    t.string "definitionstatusid", null: false
     t.index ["id", "effectivetime"], name: "index_descriptions_on_id_and_effectivetime", unique: true
   end
-
 end
