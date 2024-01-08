@@ -4,7 +4,10 @@ module SnomedModel
 
     scope :active, -> { where(active: "1") }
     scope :direct_decedants, lambda { |conceptid|
-      where(typeid: IS_A_RELATION).where(destinationid: conceptid)
+      where(typeid: IS_A_RELATION, destinationid: conceptid)
+    }
+    scope :direct_ancestors, lambda { |conceptid|
+      where(typeid: IS_A_RELATION, sourceid: conceptid)
     }
   end
 end
