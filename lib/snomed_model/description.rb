@@ -5,6 +5,7 @@ module SnomedModel
     PREFERRED = "900000000000548007".freeze
 
     scope :active, -> { where(active: "1") }
+    scope :detail, ->(id) { where(conceptid: id) }
     scope :fsns, -> { where(typeid: FSN) }
     scope :synonyms, -> { where(typeid: SYNONYM) }
     scope :preferred, -> { where(typeid: PREFERRED) }

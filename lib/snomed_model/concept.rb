@@ -13,5 +13,9 @@ module SnomedModel
         .active
         .where(conceptid: Relationship.active.direct_ancestors(id).pluck(:destinationid))
     end
+
+    def detail
+      Description.active.detail(id)
+    end
   end
 end
