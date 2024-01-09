@@ -3,11 +3,14 @@
 require "active_record"
 require "yaml"
 require "erb"
+require "dag"
+require "pg_ltree"
 
 require_relative "snomed_model/version"
 require_relative "snomed_model/concept"
 require_relative "snomed_model/description"
 require_relative "snomed_model/relationship"
+require_relative "snomed_model/hirerachy"
 
 module SnomedModel
   class Error < StandardError; end

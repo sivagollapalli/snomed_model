@@ -38,4 +38,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activerecord", '~> 7.1', '>= 7.1.2' 
   spec.add_dependency 'standalone_migrations', '~> 7.1', '>= 7.1.3'
   spec.add_dependency 'pg', '~> 1.5', '>= 1.5.4'
+  spec.add_dependency "dag", "~> 0.0.9"
+  spec.add_dependency "pg_ltree"
 end
