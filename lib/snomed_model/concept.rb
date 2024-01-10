@@ -95,7 +95,7 @@ module SnomedModel
     end
 
     def ancestors
-      concepts = Hirerachy.where("path ~ ?", "#{id}.*").each_with_object([]) do |h, array|
+      concepts = Hirerachy.where("path ~ ?", "#{id}.*.#{ROOT_CONCEPT}").each_with_object([]) do |h, array|
         array << h.path.split(".")
       end.flatten
 
