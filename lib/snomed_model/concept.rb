@@ -2,6 +2,8 @@ module SnomedModel
   class Concept < ActiveRecord::Base
     ROOT_CONCEPT = "138875005".freeze
 
+    has_many :descriptions, -> { active }, foreign_key: :conceptid
+
     scope :active, -> { where(active: "1") }
 
     def direct_decedants
@@ -82,6 +84,22 @@ module SnomedModel
 
         Hirerachy.create(path: path_str)
       end
+    end
+
+    def decedants
+      concepts = Hirerachy.where("path ~ ?", "*.#{id}").each_with_object([]) do |h, array|
+        array << h.path.split(".")
+      end.flatten
+
+      Concept.active.includes(:descriptions).where(id: concepts)
+    end
+
+    def ancestors
+      concepts = Hirerachy.where("path ~ ?", "#{id}.*").each_with_object([]) do |h, array|
+        array << h.path.split(".")
+      end.flatten
+
+      Concept.active.includes(:descriptions).where(id: concepts)
     end
   end
 end
