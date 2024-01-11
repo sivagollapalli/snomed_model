@@ -87,9 +87,12 @@ module SnomedModel
     end
 
     def decedants
-      concepts = Hirerachy.where("path ~ ?", "*.#{id}").each_with_object([]) do |h, array|
-        array << h.path.split(".")
-      end.flatten
+      concepts = Hirerachy
+                  .select("subpath(path, 0, index(path, '#{id}')) as path")
+                  .where("path ~ ?", "*.#{id}.*.#{ROOT_CONCEPT}")
+                  .each_with_object([]) do |h, array|
+                    array << h.path.split(".")
+                  end.flatten
 
       Concept.active.includes(:descriptions).where(id: concepts)
     end
