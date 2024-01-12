@@ -1,5 +1,7 @@
 module SnomedModel
   class Concept < ActiveRecord::Base
+    attr_accessor :paths
+
     ROOT_CONCEPT = "138875005".freeze
 
     has_many :descriptions, -> { active }, foreign_key: :conceptid
@@ -23,7 +25,7 @@ module SnomedModel
     end
 
     def build_or_find_vertex(dag, code)
-      vertex = dag.vertices.detect { |c| c[:code] == code }.first
+      vertex = dag.vertices.select { |c| c[:code] == code }.first
       return vertex if vertex
 
       dag.add_vertex(code: code)
@@ -61,13 +63,14 @@ module SnomedModel
 
     def find_all_paths(dag, start, path = [])
       path += [start]
-      paths = [path]
-      start.successors.each do |ver|
-        newpaths = find_all_paths(dag, ver, path)
-        newpaths.each do |newpath|
-          paths += [newpath]
-        end
+      if start[:code] == ROOT_CONCEPT
+        @paths = (paths.presence || []) + [path]
+        path = []
       end
+      start.successors.each do |ver|
+        find_all_paths(dag, ver, path)
+      end
+
       paths
     end
 
@@ -75,24 +78,24 @@ module SnomedModel
       dag = build_dag
       start = build_or_find_vertex(dag, id)
 
-      find_all_paths(dag, start).each do |path|
-        next if path.size == 1
-
+      paths = find_all_paths(dag, start).map do |path|
         path_str = path.map do |v|
           v[:code]
-        end.join(".")
+        end.reverse.join(".")
 
-        Hirerachy.create(path: path_str)
+        { path: path_str }
       end
+
+      Hirerachy.insert_all(paths)
     end
 
     def decedants
       concepts = Hirerachy
-                  .select("subpath(path, 0, index(path, '#{id}')) as path")
-                  .where("path ~ ?", "*.#{id}.*.#{ROOT_CONCEPT}")
-                  .each_with_object([]) do |h, array|
-                    array << h.path.split(".")
-                  end.flatten
+                 .select("subpath(path, 0, index(path, '#{id}')) as path")
+                 .where("path ~ ?", "*.#{id}.*.#{ROOT_CONCEPT}")
+                 .each_with_object([]) do |h, array|
+                   array << h.path.split(".")
+                 end.flatten
 
       Concept.active.includes(:descriptions).where(id: concepts)
     end
