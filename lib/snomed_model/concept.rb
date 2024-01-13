@@ -89,23 +89,20 @@ module SnomedModel
       Hirerachy.insert_all(paths)
     end
 
-    def decedants
-      concepts = Hirerachy
-                 .select("subpath(path, 0, index(path, '#{id}')) as path")
-                 .where("path ~ ?", "*.#{id}.*.#{ROOT_CONCEPT}")
-                 .each_with_object([]) do |h, array|
-                   array << h.path.split(".")
-                 end.flatten
+    def fetch_concepts(paths)
+      concepts = paths.each_with_object([]) do |path, array|
+        array << path.subpath.split(".")
+      end.flatten.uniq
 
       Concept.active.includes(:descriptions).where(id: concepts)
     end
 
-    def ancestors
-      concepts = Hirerachy.where("path ~ ?", "#{id}.*.#{ROOT_CONCEPT}").each_with_object([]) do |h, array|
-        array << h.path.split(".")
-      end.flatten
+    def decedants
+      fetch_concepts(Hirerachy.decedants(id))
+    end
 
-      Concept.active.includes(:descriptions).where(id: concepts)
+    def ancestors
+      fetch_concepts(Hirerachy.ancestors(id))
     end
   end
 end
