@@ -3,8 +3,11 @@ module SnomedModel
     attr_accessor :paths
 
     ROOT_CONCEPT = "138875005".freeze
+    DISEASE_CONCEPT = "64572001".freeze
+    CLINICAL_FINDING = "404684003".freeze
 
     has_many :descriptions, -> { active }, foreign_key: :conceptid
+    has_many :synonyms, -> { active.synonyms }, foreign_key: :conceptid, class_name: "Description"
 
     scope :active, -> { where(active: "1") }
 
@@ -94,7 +97,7 @@ module SnomedModel
         array << path.subpath.split(".")
       end.flatten.uniq
 
-      Concept.active.includes(:descriptions).where(id: concepts)
+      Concept.active.includes(:descriptions).where(id: (concepts - [id.to_s]))
     end
 
     def decedants
@@ -103,6 +106,14 @@ module SnomedModel
 
     def ancestors
       fetch_concepts(Hirerachy.ancestors(id))
+    end
+
+    def disease?
+      ancestors.exists?(id: DISEASE_CONCEPT)
+    end
+
+    def clinical_finding?
+      ancestors.exists?(id: CLINICAL_FINDING)
     end
   end
 end
