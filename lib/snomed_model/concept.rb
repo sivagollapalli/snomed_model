@@ -28,17 +28,21 @@ module SnomedModel
     end
 
     def build_or_find_vertex(dag, code)
-      vertex = dag.vertices.select { |c| c[:code] == code }.first
+      vertex = dag.vertices.detect { |c| c[:code] == code }
       return vertex if vertex
 
       dag.add_vertex(code: code)
     end
 
-    def is_a_relationships
+    def ancestor_relationships
       Relationship.active.direct_ancestors(id)
     end
+
+    def decedant_relationships
+      Relationship.active.direct_decedants(id)
+    end
     
-    def build_dag
+    def build_ancestor_dag
       code = id
       dag = DAG.new
       queue = Queue.new
@@ -46,7 +50,7 @@ module SnomedModel
 
       loop do
         source = queue.pop
-        destinations = Concept.find(source).is_a_relationships.distinct(:destinationid).pluck(:destinationid)
+        destinations = Concept.find(source).ancestor_relationships.distinct(:destinationid).pluck(:destinationid)
         break unless destinations.any?
 
         source_vertex = build_or_find_vertex(dag, source)
@@ -57,6 +61,32 @@ module SnomedModel
         end
       end
       dag
+    end
+
+    def build_decedants_dag(dag)
+      code = id
+      queue = Queue.new
+      queue.push(code)
+      leaf_nodes = []
+
+      loop do
+        puts "queue length #{queue.length}"
+        break if queue.empty?
+
+        destination = queue.pop
+        puts "current code is #{destination}"
+        sources = Concept.find(destination).decedant_relationships.distinct(:sourceid).pluck(:sourceid)
+        if sources.empty?
+          leaf_nodes << destination
+        end
+
+        sources.each do |source|
+          source_vertex = build_or_find_vertex(dag, source)
+          add_edge(dag, source_vertex, destination)
+          queue.push(source)
+        end
+      end
+      [dag, leaf_nodes]
     end
 
     def add_edge(dag, source_vertex, destination)
@@ -78,18 +108,22 @@ module SnomedModel
     end
 
     def build_paths
-      dag = build_dag
-      start = build_or_find_vertex(dag, id)
+      dag = build_ancestor_dag
+      dag, leaf_nodes = build_decedants_dag(dag)
 
-      paths = find_all_paths(dag, start).map do |path|
-        path_str = path.map do |v|
-          v[:code]
-        end.reverse.join(".")
+      leaf_nodes.each do |id|
+        start = build_or_find_vertex(dag, id)
 
-        { path: path_str }
+        paths = find_all_paths(dag, start).map do |path|
+          path_str = path.map do |v|
+            v[:code]
+          end.reverse.join(".")
+
+          { path: path_str }
+        end
+
+        Hirerachy.insert_all(paths)
       end
-
-      Hirerachy.insert_all(paths)
     end
 
     def fetch_concepts(paths)
