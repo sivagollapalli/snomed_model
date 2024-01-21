@@ -10,6 +10,15 @@ module SnomedModel
     has_many :synonyms, -> { active.synonyms }, foreign_key: :conceptid, class_name: "Description"
 
     scope :active, -> { where(active: "1") }
+    scope :leaf_concepts, lambda {
+      concepts = SnomedModel::Relationship
+                  .select("destinationid::bigint")
+                  .active
+                  .where(typeid: SnomedModel::Relationship::IS_A_RELATION)
+                  .group(:destinationid)
+                  
+      SnomedModel::Concept.active.where.not(id: concepts)
+    }
 
     def direct_decedants
       Description
@@ -109,21 +118,18 @@ module SnomedModel
 
     def build_paths
       dag = build_ancestor_dag
-      dag, leaf_nodes = build_decedants_dag(dag)
 
-      leaf_nodes.each do |id|
-        start = build_or_find_vertex(dag, id)
+      start = build_or_find_vertex(dag, id)
 
-        paths = find_all_paths(dag, start).map do |path|
-          path_str = path.map do |v|
-            v[:code]
-          end.reverse.join(".")
+      paths = find_all_paths(dag, start).map do |path|
+        path_str = path.map do |v|
+          v[:code]
+        end.reverse.join(".")
 
-          { path: path_str }
-        end
-
-        Hirerachy.insert_all(paths)
+        { path: path_str }
       end
+
+      Hirerachy.insert_all(paths)
     end
 
     def fetch_concepts(paths)

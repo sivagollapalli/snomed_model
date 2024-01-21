@@ -1,4 +1,3 @@
-require 'pry'
 namespace :snomed do 
   task :load_concepts, [:arg] do |_, args|
     file = args[:arg]
@@ -78,6 +77,22 @@ namespace :snomed do
     records.each_slice(10000) do |batch|
       p "Inserting batch....."
       SnomedModel::Relationship.insert_all(batch)
+    end
+  end
+
+  task :build_paths_for_sample_data do
+    Concept.leaf_concepts.order('random()').limit(100).map do |concept|
+      puts "Building path for #{concept.id}....."
+      concept.build_paths
+    end
+  end
+
+  task :build_paths do
+    Concept.leaf_concepts.find_in_batches do |group|
+      group.map do |concept|
+        puts "Building path for #{concept.id}....."
+        concept.build_paths
+      end
     end
   end
 end
