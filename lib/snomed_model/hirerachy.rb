@@ -3,7 +3,7 @@ module SnomedModel
     ltree :path
 
     scope :concept_paths, ->(conceptid) { where("path ~ ?", "*.#{conceptid}.*") }
-    scope :decedants, lambda { |conceptid|
+    scope :descendants, lambda { |conceptid|
       select("subpath(path, index(path, '#{conceptid}'), nlevel(path)) as subpath").concept_paths(conceptid)
     }
     scope :ancestors, lambda { |conceptid|
