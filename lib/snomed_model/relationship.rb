@@ -3,7 +3,7 @@ module SnomedModel
     IS_A_RELATION = "116680003".freeze
 
     scope :active, -> { where(active: "1") }
-    scope :direct_descendants, lambda { |conceptid|
+    scope :direct_descendant, lambda { |conceptid|
       where(typeid: IS_A_RELATION, destinationid: conceptid)
     }
     scope :direct_ancestors, lambda { |conceptid|

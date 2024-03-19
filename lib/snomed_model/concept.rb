@@ -20,10 +20,10 @@ module SnomedModel
       SnomedModel::Concept.active.where.not(id: concepts)
     }
 
-    def direct_descendants
+    def direct_descendant
       Description
         .active
-        .where(conceptid: Relationship.active.direct_descendants(id).pluck(:sourceid))
+        .where(conceptid: Relationship.active.direct_descendant(id).pluck(:sourceid))
     end
 
     def direct_ancestors
@@ -48,7 +48,7 @@ module SnomedModel
     end
 
     def decedant_relationships
-      Relationship.active.direct_descendants(id)
+      Relationship.active.direct_descendant(id)
     end
     
     def build_ancestor_dag
@@ -72,7 +72,7 @@ module SnomedModel
       dag
     end
 
-    def build_descendants_dag(dag)
+    def build_descendant_dag(dag)
       code = id
       queue = Queue.new
       queue.push(code)
@@ -140,8 +140,8 @@ module SnomedModel
       Concept.active.includes(:descriptions).where(id: (concepts - [id.to_s]))
     end
 
-    def descendants
-      fetch_concepts(Hirerachy.descendants(id))
+    def descendant
+      fetch_concepts(Hirerachy.descendant(id))
     end
 
     def ancestors
